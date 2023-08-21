@@ -1,5 +1,6 @@
 package com.example.lab5.View;
 
+import com.example.lab5.Controller.Word;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -7,6 +8,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.ArrayList;
 
 @Route(value = "/index2")
 public class MyView2 extends HorizontalLayout {
@@ -17,6 +21,7 @@ public class MyView2 extends HorizontalLayout {
     private TextArea goodSentence, badSentence;
 
     public MyView2() {
+        Word words = new Word();
         l1 = new VerticalLayout();
         l2 = new VerticalLayout();
         textWord = new TextField();
@@ -43,13 +48,17 @@ public class MyView2 extends HorizontalLayout {
         badSentence.setWidthFull();
         addSentence.setWidthFull();
         showSentence.setWidthFull();
-
+        goodWords.setItems(words.getGoodWord());
+        badWords.setItems(words.getBadWord());
         addGood.addClickListener(event -> {
-            Word words;
-            words = new WebClient.create().get().uri("http://localhost:8080/addGood/"+textWord.getValue()).retrieve().bodyToMono(Word.class).block();
+            ArrayList a;
+            a = WebClient.create().get().uri("http://localhost:8080/addGood/"+textWord.getValue()).retrieve().bodyToMono(ArrayList.class).block();
+            goodWords.setItems(a);
         });
         addBad.addClickListener(event -> {
-
+            ArrayList a;
+            a = WebClient.create().get().uri("http://localhost:8080/addBad/"+textWord.getValue()).retrieve().bodyToMono(ArrayList.class).block();
+            badWords.setItems(a);
         });
         addSentence.addClickListener(event -> {
 
@@ -58,7 +67,7 @@ public class MyView2 extends HorizontalLayout {
 
         });
 
-        l1.add(textWord, addGood, addBad, badWords, goodWords);
+        l1.add(textWord, addGood, addBad, goodWords, badWords);
         l2.add(textSentence, addSentence, goodSentence, badSentence, showSentence);
         add(l1, l2);
     }
