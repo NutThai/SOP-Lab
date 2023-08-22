@@ -27,13 +27,13 @@ public class WordPublisher {
         return words.getBadWord();
     }
 
-    @PostMapping(value = "/delBad/{word}")
+    @GetMapping(value = "/delBad/{word}")
     public ArrayList<String> deleteBadWord(@PathVariable String word) {
         words.getBadWord().remove(word);
         return words.getBadWord();
     }
 
-    @GetMapping(value = "/addGood/{word}")
+    @PostMapping(value = "/addGood/{word}")
     public ArrayList<String> addGoodWord(@PathVariable String word) {
         words.getGoodWord().add(word);
         return words.getGoodWord();
