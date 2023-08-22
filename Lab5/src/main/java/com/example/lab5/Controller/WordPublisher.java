@@ -1,9 +1,11 @@
 package com.example.lab5.Controller;
 
+import org.atmosphere.config.service.Post;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -19,13 +21,13 @@ public class WordPublisher {
         words = new Word();
     }
 
-    @GetMapping(value = "/addBad/{word}")
+    @PostMapping(value = "/addBad/{word}")
     public ArrayList<String> addBadWord(@PathVariable String word) {
         words.getBadWord().add(word);
         return words.getBadWord();
     }
 
-    @GetMapping(value = "/delBad/{word}")
+    @PostMapping(value = "/delBad/{word}")
     public ArrayList<String> deleteBadWord(@PathVariable String word) {
         words.getBadWord().remove(word);
         return words.getBadWord();
@@ -43,8 +45,8 @@ public class WordPublisher {
         return words.getGoodWord();
     }
 
-    @GetMapping(value = "/proof/{word}")
-    public void proofSentence(@PathVariable String word) {
+    @PostMapping(value = "/proof/{word}")
+    public String proofSentence(@PathVariable String word) {
         boolean good = false;
         boolean bad = false;
         for (String i : words.getGoodWord()) {
@@ -57,15 +59,22 @@ public class WordPublisher {
         }
         if (good & bad) {
             rabbitTemplate.convertAndSend("Fanout", "", word);
+
         } else if (good) {
             rabbitTemplate.convertAndSend("Direct", "good", word);
+
         } else if (bad) {
             rabbitTemplate.convertAndSend("Direct", "bad", word);
+
         }
+        return good & bad ? "Found Bad & Good Word"
+                : good ? "Found Good Word"
+                : bad ? "Found Bad Word"
+                : "Found Nothing";
     }
 
     @GetMapping(value = "/getSentence")
-    public Sentence getSentence(){
-        return (Sentence) rabbitTemplate.convertSendAndReceive("Direct","show","");
+    public Sentence getSentence() {
+        return (Sentence) rabbitTemplate.convertSendAndReceive("Direct", "show", "");
     }
 }
