@@ -16,42 +16,43 @@ public class WizardController {
     @Autowired
     private WizardService wizardService;
 
-    @GetMapping(value = "wizards")
+    @GetMapping(value = "/wizards")
     public List<Wizard> getWizard() {
         return wizardService.allWizard();
     }
 
-    @PostMapping(value = "addWizard/{name}/{sex}/{posi}/{money}/{school}/{house}")
+    @PostMapping(value = "/addWizard/{name}/{sex}/{posi}/{money}/{school}/{house}")
     public boolean addWizard(@PathVariable String name, @PathVariable String sex,
                              @PathVariable String posi, @PathVariable int money,
                              @PathVariable String school, @PathVariable String house) {
-        if (!wizardService.findWizard(name).getName().equals(name)) {
-            Wizard wizard = new Wizard(null, name, sex, posi, money, school, house);
-            wizardService.createWizard(wizard);
+        if (wizardService.findWizard(name) == null) {
+            wizardService.createWizard(new Wizard(null, name, sex.equals("Male") ? "m" : sex.equals("Female") ? "f": "", posi.toLowerCase(), money, school, house));
             return true;
         }
         return false;
 
     }
 
-    @PostMapping(value = "updateWizard/{id}/{name}/{sex}/{posi}/{money}/{school}/{house}")
+    @PostMapping(value = "/updateWizard/{id}/{name}/{sex}/{posi}/{money}/{school}/{house}")
     public boolean updateWizard(@PathVariable String id, @PathVariable String name, @PathVariable String sex,
                                 @PathVariable String posi, @PathVariable int money,
                                 @PathVariable String school, @PathVariable String house) {
+//        System.out.println(new Wizard(id, name, sex, posi, money, school, house));
+            System.out.println(id);
         try {
-            Wizard wizard = wizardService.findWizardById(id);
-            wizardService.updateWizard(new Wizard(wizard.get_id(), name, sex, posi, money, school, house));
+            wizardService.updateWizard(new Wizard(id, name, sex.equals("Male") ? "m" : sex.equals("Female") ? "f": "", posi.toLowerCase(), money, school, house));
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    @PostMapping(value = "deleteWizard/{name}")
-    public boolean deleteWizard(@PathVariable String name) {
+    @PostMapping(value = "deleteWizard/{id}")
+    public boolean deleteWizard(@PathVariable String id) {
         try {
-            Wizard wizard = wizardService.findWizard(name);
-            wizardService.deleteWizard(wizard);
+            Wizard wiz = wizardService.findWizardById(id);
+            System.out.println(wiz);
+            wizardService.deleteWizard(wiz);
         } catch (Exception e) {
             return false;
         }

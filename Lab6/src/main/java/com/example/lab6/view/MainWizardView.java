@@ -28,19 +28,22 @@ public class MainWizardView extends VerticalLayout {
 
     private int currentIndex, size;
     private List<Wizard> wizards;
-    public void setTextField(){
 
-        wizards = WebClient.create().get().uri("http://localhost:8080/wizards").retrieve().bodyToFlux(Wizard.class).collectList().block();
-        size = wizards.size();
+    public void setTextField() {
         Wizard wizard = wizards.get(currentIndex);
-        System.out.println(wizards);
         fullName.setValue(wizard.getName());
-        dollar.setValue(wizard.getMoney()+"");
-        position.setValue(wizard.getPosition());
+        dollar.setValue(wizard.getMoney() + "");
+        position.setValue(wizard.getPosition().toUpperCase().charAt(0) + wizard.getPosition().substring(1));
         gender.setValue(wizard.getSex().equals("m") ? "Male" : wizard.getSex().equals("f") ? "Female" : "");
         school.setValue(wizard.getSchool());
         house.setValue(wizard.getHouse());
     }
+
+    public void loadList() {
+        wizards = WebClient.create().get().uri("http://localhost:8080/wizards").retrieve().bodyToFlux(Wizard.class).collectList().block();
+        size = wizards.size();
+    }
+
     public MainWizardView() {
         currentIndex = 0;
         fullName = new TextField("", "Fullname");
@@ -62,7 +65,7 @@ public class MainWizardView extends VerticalLayout {
         horizontalLayout.add(left, create, update, delete, right);
 //        int i = (((index % size) + size) % size);
 
-
+        loadList();
         setTextField();
 
         left.addClickListener(event -> {
@@ -73,7 +76,33 @@ public class MainWizardView extends VerticalLayout {
             currentIndex = (((++currentIndex % size) + size) % size);
             setTextField();
         });
-
+        create.addClickListener(event -> {
+//           System.out.println(wizards.get(currentIndex).get_id());
+//            System.out.println(wizards.get(currentIndex).get_id().getClass());
+//            System.out.println(());
+            Boolean res = WebClient.create().post().uri("http://localhost:8080/addWizard/{name}/{sex}/{posi}/{money}/{school}/{house}",
+                            fullName.getValue(), gender.getValue(), position.getValue(), dollar.getValue(), school.getValue(), house.getValue())
+                    .retrieve().bodyToMono(Boolean.class).block();
+            if (res) {
+                loadList();
+            }
+        });
+        update.addClickListener(event -> {
+            Boolean res = WebClient.create().post().uri("http://localhost:8080/updateWizard/{id}/{name}/{sex}/{posi}/{money}/{school}/{house}",
+                            wizards.get(currentIndex).get_id(),fullName.getValue(), gender.getValue(), position.getValue(), dollar.getValue(), school.getValue(), house.getValue())
+                    .retrieve().bodyToMono(Boolean.class).block();
+            if (res) {
+                loadList();
+            }
+        });
+        delete.addClickListener(event -> {
+           Boolean res = WebClient.create().post().uri("http://localhost:8080/deleteWizard/{id}", wizards.get(currentIndex).get_id()).retrieve().bodyToMono(Boolean.class).block();
+            if (res) {
+                currentIndex = 0;
+                loadList();
+                setTextField();
+            }
+        });
         add(fullName, gender, position, dollar, school, house, horizontalLayout);
     }
 }
