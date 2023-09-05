@@ -44,6 +44,13 @@ public class MainWizardView extends VerticalLayout {
             gender.setValue(wizard.getSex().equals("m") ? "Male" : wizard.getSex().equals("f") ? "Female" : "");
             school.setValue(wizard.getSchool());
             house.setValue(wizard.getHouse());
+        }else{
+            fullName.setValue("");
+            dollar.setValue("");
+            position.setValue("");
+            gender.setValue("");
+            school.setValue("");
+            house.setValue("");
         }
     }
 
