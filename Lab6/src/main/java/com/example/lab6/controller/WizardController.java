@@ -5,10 +5,12 @@ import com.example.lab6.pojo.Wizards;
 import com.example.lab6.repository.WizardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -21,42 +23,36 @@ public class WizardController {
         return wizardService.allWizard();
     }
 
-    @PostMapping(value = "/addWizard/{name}/{sex}/{posi}/{money}/{school}/{house}")
-    public boolean addWizard(@PathVariable String name, @PathVariable String sex,
-                             @PathVariable String posi, @PathVariable int money,
-                             @PathVariable String school, @PathVariable String house) {
-        if (wizardService.findWizard(name) == null) {
-            wizardService.createWizard(new Wizard(null, name, sex.equals("Male") ? "m" : sex.equals("Female") ? "f": "", posi.toLowerCase(), money, school, house));
-            return true;
+    @PostMapping(value = "/addWizard")
+    public ResponseEntity<Boolean> addWizard(@RequestBody MultiValueMap<String, String> n) {
+        Map<String, String> b = n.toSingleValueMap();
+        if (wizardService.findWizard(b.get("name")) == null) {
+            wizardService.createWizard(new Wizard(null, b.get("name"),
+                    b.get("sex").equals("Male") ? "m" : b.get("sex").equals("Female") ? "f" : "",
+                    b.get("posi").toLowerCase(), Integer.parseInt(b.get("money")), b.get("school"), b.get("house")));
+            return ResponseEntity.ok(true);
         }
-        return false;
+        return ResponseEntity.ok(false);
 
     }
 
-    @PostMapping(value = "/updateWizard/{id}/{name}/{sex}/{posi}/{money}/{school}/{house}")
-    public boolean updateWizard(@PathVariable String id, @PathVariable String name, @PathVariable String sex,
-                                @PathVariable String posi, @PathVariable int money,
-                                @PathVariable String school, @PathVariable String house) {
-//        System.out.println(new Wizard(id, name, sex, posi, money, school, house));
-            System.out.println(id);
-        try {
-            wizardService.updateWizard(new Wizard(id, name, sex.equals("Male") ? "m" : sex.equals("Female") ? "f": "", posi.toLowerCase(), money, school, house));
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
+    @PostMapping(value = "/updateWizard")
+    public ResponseEntity<Boolean> updateWizard(@RequestBody MultiValueMap<String, String> n) {
+        Map<String, String> b = n.toSingleValueMap();
+        wizardService.updateWizard(new Wizard(b.get("id"), b.get("name"),
+                b.get("sex").equals("Male") ? "m" : b.get("sex").equals("Female") ? "f" : "",
+                b.get("posi").toLowerCase(), Integer.parseInt(b.get("money")), b.get("school"), b.get("house")));
+        return ResponseEntity.ok(true);
+
     }
 
-    @PostMapping(value = "deleteWizard/{id}")
-    public boolean deleteWizard(@PathVariable String id) {
-        try {
-            Wizard wiz = wizardService.findWizardById(id);
-            System.out.println(wiz);
-            wizardService.deleteWizard(wiz);
-        } catch (Exception e) {
-            return false;
+    @PostMapping(value = "/deleteWizard/{id}")
+    public ResponseEntity<Boolean> deleteWizard(@PathVariable String id) {
+        System.out.println(id);
+        if (wizardService.findWizardById(id) != null) {
+            wizardService.deleteWizard(wizardService.findWizardById(id));
+            return ResponseEntity.ok(true);
         }
-        return true;
-
+        return ResponseEntity.ok(false);
     }
 }

@@ -5,12 +5,17 @@ import com.example.lab6.pojo.Wizards;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import org.springframework.stereotype.Service;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
@@ -25,28 +30,38 @@ public class MainWizardView extends VerticalLayout {
     private ComboBox position, school, house;
     private Button left, right, create, update, delete;
     private HorizontalLayout horizontalLayout;
-
+    private Notification notification;
     private int currentIndex, size;
     private Wizards wizards = new Wizards();
 
     public void setTextField() {
-        Wizard wizard = wizards.getWizards().get(currentIndex);
-        fullName.setValue(wizard.getName());
-        dollar.setValue(wizard.getMoney() + "");
-        position.setValue(wizard.getPosition().toUpperCase().charAt(0) + wizard.getPosition().substring(1));
-        gender.setValue(wizard.getSex().equals("m") ? "Male" : wizard.getSex().equals("f") ? "Female" : "");
-        school.setValue(wizard.getSchool());
-        house.setValue(wizard.getHouse());
+        if(wizards.getWizards() != null && !wizards.getWizards().isEmpty()){
+            Wizard wizard = wizards.getWizards().get(currentIndex);
+            notification = new Notification("",5000);
+            fullName.setValue(wizard.getName());
+            dollar.setValue(wizard.getMoney() + "");
+            position.setValue(wizard.getPosition().toUpperCase().charAt(0) + wizard.getPosition().substring(1));
+            gender.setValue(wizard.getSex().equals("m") ? "Male" : wizard.getSex().equals("f") ? "Female" : "");
+            school.setValue(wizard.getSchool());
+            house.setValue(wizard.getHouse());
+        }
     }
 
     public void loadList() {
-        List wiz =  WebClient.create().get().uri("http://localhost:8080/wizards").retrieve().bodyToFlux(Wizard.class).collectList().block();
-        wizards.setWizards((ArrayList) wiz);
-        size = wizards.getWizards().size();
+        List wiz = WebClient.create().get().uri("http://localhost:8080/wizards").retrieve().bodyToFlux(Wizard.class).collectList().block();
+        System.out.println(wiz);
+        if(wiz != null && !wiz.isEmpty()){
+            wizards.setWizards((ArrayList) wiz);
+            size = wizards.getWizards().size();
+        }
+        else {
+            wizards.setWizards(new ArrayList<>());
+        }
     }
 
     public MainWizardView() {
         currentIndex = 0;
+        notification = new Notification("",5000);
         fullName = new TextField("", "Fullname");
         dollar = new TextField("Dollars");
         dollar.setPrefixComponent(new Span("$ "));
@@ -78,28 +93,49 @@ public class MainWizardView extends VerticalLayout {
             setTextField();
         });
         create.addClickListener(event -> {
-            Boolean res = WebClient.create().post().uri("http://localhost:8080/addWizard/{name}/{sex}/{posi}/{money}/{school}/{house}",
-                            fullName.getValue(), gender.getValue(), position.getValue(), dollar.getValue(), school.getValue(), house.getValue())
-                    .retrieve().bodyToMono(Boolean.class).block();
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("name", fullName.getValue());
+            formData.add("sex", gender.getValue());
+            formData.add("posi", position.getValue()+"");
+            formData.add("money", dollar.getValue());
+            formData.add("school", school.getValue()+"");
+            formData.add("house", house.getValue()+"");
+            Boolean res = WebClient.create().post().uri("http://localhost:8080/addWizard")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData(formData)).retrieve().bodyToMono(Boolean.class).block();
             if (res) {
                 loadList();
+                notification.setText("Wizard has been Created");
+                notification.open();
             }
         });
         update.addClickListener(event -> {
-            Boolean res = WebClient.create().post().uri("http://localhost:8080/updateWizard/{id}/{name}/{sex}/{posi}/{money}/{school}/{house}",
-                            wizards.getWizards().get(currentIndex).get_id(),fullName.getValue(), gender.getValue(), position.getValue(), dollar.getValue(), school.getValue(), house.getValue())
-                    .retrieve().bodyToMono(Boolean.class).block();
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("id", wizards.getWizards().get(currentIndex).get_id());
+            formData.add("name", fullName.getValue());
+            formData.add("sex", gender.getValue());
+            formData.add("posi", position.getValue()+"");
+            formData.add("money", dollar.getValue());
+            formData.add("school", school.getValue()+"");
+            formData.add("house", house.getValue()+"");
+            Boolean res = WebClient.create().post().uri("http://localhost:8080/updateWizard")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData(formData)).retrieve().bodyToMono(Boolean.class).block();
             if (res) {
                 loadList();
+                notification.setText("Wizard has been Updated");
+                notification.open();
             }
         });
         delete.addClickListener(event -> {
-           Boolean res = WebClient.create().post().uri("http://localhost:8080/deleteWizard/{id}",
-                   wizards.getWizards().get(currentIndex).get_id()).retrieve().bodyToMono(Boolean.class).block();
+            Boolean res = WebClient.create().post().uri("http://localhost:8080/deleteWizard/{id}",
+                    wizards.getWizards().get(currentIndex).get_id()).retrieve().bodyToMono(Boolean.class).block();
             if (res) {
                 currentIndex = 0;
                 loadList();
                 setTextField();
+                notification.setText("Wizard has been Removed");
+                notification.open();
             }
         });
         add(fullName, gender, position, dollar, school, house, horizontalLayout);
