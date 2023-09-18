@@ -21,6 +21,7 @@ public class WizardService {
         this.wizardRepository = wizardRepository;
     }
 
+    @Cacheable(value = "wizard", key = "'wizard'")
     public List<Wizard> allWizard() {
         return wizardRepository.findAll();
     }

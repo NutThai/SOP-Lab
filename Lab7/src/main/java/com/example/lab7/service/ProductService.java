@@ -27,9 +27,13 @@ public class ProductService {
     }
     @CachePut(value = "product", key = "'product'")
     @RabbitListener(queues = "UpdateProductQueue")
-    public boolean updateProduct(Product mes) {
-        productRepository.save(mes);
-        return true;
+    public List<Product> updateProduct(Product mes) {
+        try{
+            productRepository.save(mes);
+            return productRepository.findAll();
+        }catch(Exception err){
+            return null;
+        }
     }
 
     @CacheEvict(value = "product", key = "'product'")
@@ -42,6 +46,7 @@ public class ProductService {
             return false;
         }
     }
+    @Cacheable(value = "product", key = "'product'")
     @RabbitListener(queues = "GetAllProductQueue")
     public List<Product> getAllProduct() {
         return productRepository.findAll();
