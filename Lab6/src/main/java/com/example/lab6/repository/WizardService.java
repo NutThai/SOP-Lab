@@ -21,6 +21,7 @@ public class WizardService {
         this.wizardRepository = wizardRepository;
     }
 
+    @Cacheable(value = "wizard", key = "'wizard'")
     public List<Wizard> allWizard() {
         return wizardRepository.findAll();
     }
@@ -37,7 +38,8 @@ public class WizardService {
     public void createWizard(Wizard wizard) {
         wizardRepository.save(wizard);
     }
-    @CachePut(value = "wizard", key = "'wizard'")
+
+    @CacheEvict(value = "wizard", key = "'wizard'")
     public void updateWizard(Wizard wizard) {
         wizardRepository.save(wizard);
     }

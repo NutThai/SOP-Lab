@@ -53,7 +53,7 @@ public class ProductView extends VerticalLayout {
         updateBtn.addClickListener(clickEvent -> {
             Product old = WebClient.create().get().uri("http://localhost:8080/serviceGetProductName/{name}", productList.getValue()).retrieve().bodyToMono(Product.class).block();
             Product product = new Product(old.get_id(), productNameField.getValue(), productCostField.getValue(), productProfitField.getValue(), productPriceField.getValue());
-            boolean res = WebClient.create().post().uri("http://localhost:8080/serviceUpdateProduct").contentType(MediaType.APPLICATION_JSON).bodyValue(product).retrieve().bodyToMono(boolean.class).block();
+            List res = WebClient.create().post().uri("http://localhost:8080/serviceUpdateProduct").contentType(MediaType.APPLICATION_JSON).bodyValue(product).retrieve().bodyToMono(List.class).block();
             setItem();
             clearField();
         });

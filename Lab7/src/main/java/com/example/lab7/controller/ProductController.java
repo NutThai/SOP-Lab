@@ -19,8 +19,8 @@ public class ProductController {
     }
 
     @PostMapping(value = "/serviceUpdateProduct")
-    public boolean serviceUpdateProduct(@RequestBody Product a) {
-        boolean res = (boolean) rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
+    public List serviceUpdateProduct(@RequestBody Product a) {
+        List res = (List) rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
         return res;
     }
     @PostMapping(value = "/serviceDeleteProduct/{id}")
