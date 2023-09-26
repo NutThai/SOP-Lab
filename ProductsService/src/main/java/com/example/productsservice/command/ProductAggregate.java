@@ -1,7 +1,6 @@
 package com.example.productsservice.command;
 
 import com.example.productsservice.event.ProductCreatedEvent;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
