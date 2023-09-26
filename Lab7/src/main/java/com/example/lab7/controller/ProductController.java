@@ -20,7 +20,11 @@ public class ProductController {
 
     @PostMapping(value = "/serviceUpdateProduct")
     public List serviceUpdateProduct(@RequestBody Product a) {
+<<<<<<< HEAD
         List res = (List) rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
+=======
+        List res = (List)rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
+>>>>>>> parent of 802a995 (Revert "lab8")
         return res;
     }
     @PostMapping(value = "/serviceDeleteProduct/{id}")
