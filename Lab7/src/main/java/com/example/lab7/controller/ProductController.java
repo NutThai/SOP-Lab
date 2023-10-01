@@ -20,24 +20,24 @@ public class ProductController {
 
     @PostMapping(value = "/serviceUpdateProduct")
     public List serviceUpdateProduct(@RequestBody Product a) {
-<<<<<<< HEAD
         List res = (List) rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
-=======
-        List res = (List)rabbitTemplate.convertSendAndReceive("ProductExchange", "update", a);
->>>>>>> parent of 802a995 (Revert "lab8")
+
         return res;
     }
+
     @PostMapping(value = "/serviceDeleteProduct/{id}")
     public boolean serviceDeleteProduct(@PathVariable String id) {
         boolean res = (boolean) rabbitTemplate.convertSendAndReceive("ProductExchange", "delete", id);
         return res;
     }
+
     @GetMapping(value = "/serviceGetProductName/{name}")
 
     public Product serviceGetProductName(@PathVariable String name) {
         Product res = (Product) rabbitTemplate.convertSendAndReceive("ProductExchange", "getname", name);
         return res;
     }
+
     @GetMapping(value = "/serviceGetAllProduct")
 
     public List<Product> serviceGetAllProduct() {
