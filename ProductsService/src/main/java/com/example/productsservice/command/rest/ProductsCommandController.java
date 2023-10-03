@@ -1,4 +1,4 @@
-package com.example.productsservice.rest;
+package com.example.productsservice.command.rest;
 
 import com.example.productsservice.command.CreateProductCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/products")
-public class ProductsController {
+@RequestMapping("/product")
+public class ProductsCommandController {
     private final Environment env;
     private final CommandGateway commandGateway;
     @Autowired
-    public ProductsController(Environment env, CommandGateway commandGateway){
+    public ProductsCommandController(Environment env, CommandGateway commandGateway){
         this.env = env;
         this.commandGateway = commandGateway;
     }
