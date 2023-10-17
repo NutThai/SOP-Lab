@@ -11,6 +11,7 @@ import com.example.ordersservice.Event.OrderApprovedEvent;
 import com.example.ordersservice.Event.OrderCreatedEvent;
 import com.example.ordersservice.command.ApproveOrderCommand;
 import com.example.ordersservice.command.RejectOrderCommand;
+import jakarta.inject.Inject;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.modelling.saga.EndSaga;
@@ -23,9 +24,12 @@ import java.util.UUID;
 
 @Saga
 public class OrderSaga {
-    private final transient CommandGateway commandGateway;
+    @Inject
+    private transient CommandGateway commandGateway;
+    @Inject
     private transient QueryGateway queryGateway;
 
+    public OrderSaga(){}
     public OrderSaga(CommandGateway commandGateway, QueryGateway queryGateway) {
         this.commandGateway = commandGateway;
         this.queryGateway = queryGateway;
@@ -34,12 +38,14 @@ public class OrderSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderCreatedEvent orderCreatedEvent) {
+
         ReserveProductCommand reserveProductCommand = ReserveProductCommand.builder()
                 .orderId(orderCreatedEvent.getOrderId())
                 .productId(orderCreatedEvent.getProductId())
                 .quantity(orderCreatedEvent.getQuantity())
                 .userId(orderCreatedEvent.getUserId())
                 .build();
+        System.out.println("ReserveProductCommand "+reserveProductCommand.toString());
         commandGateway.send(reserveProductCommand, (commandMessage, commandResultMessage) -> {
             if (commandResultMessage.isExceptional()) {
                 RejectOrderCommand rejectOrderCommand = new RejectOrderCommand(
@@ -53,6 +59,7 @@ public class OrderSaga {
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(ProductReservedEvent productReservedEvent) {
+        System.out.println("Hello reserved");
         FetchUserPaymentDetailsQuery fetchUserPaymentDetailsQuery = new FetchUserPaymentDetailsQuery(productReservedEvent.getUserId());
         User user = null;
         try{

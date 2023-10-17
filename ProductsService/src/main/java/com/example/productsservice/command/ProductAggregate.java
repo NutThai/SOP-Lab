@@ -1,6 +1,7 @@
 package com.example.productsservice.command;
 
 import com.example.core.commands.CancelProductReservationCommand;
+import com.example.core.commands.ReserveProductCommand;
 import com.example.core.events.ProductReservationCancelledEvent;
 import com.example.core.events.ProductReservedEvent;
 import com.example.productsservice.core.event.ProductCreatedEvent;
@@ -19,7 +20,7 @@ public class ProductAggregate {
     private String productId;
     private String title;
     private BigDecimal price;
-    private Integer quantity;
+    private int quantity;
     public ProductAggregate(){}
     @CommandHandler
     public ProductAggregate(CreateProductCommand createProductCommand){
@@ -35,6 +36,19 @@ public class ProductAggregate {
         AggregateLifecycle.apply(productCreatedEvent);
     }
 
+    @CommandHandler
+    public ProductAggregate(ReserveProductCommand reserveProductCommand){
+        if (this.quantity < reserveProductCommand.getQuantity()){
+            throw new IllegalArgumentException("Insufficient number of items in stock");
+        }
+        ProductReservedEvent productReservedEvent = ProductReservedEvent.builder()
+                .orderId(reserveProductCommand.getOrderId())
+                .productId(reserveProductCommand.getProductId())
+                .quantity(reserveProductCommand.getQuantity())
+                .userId(reserveProductCommand.getUserId())
+                .build();
+        AggregateLifecycle.apply(productReservedEvent);
+    }
     @CommandHandler
     public ProductAggregate(CancelProductReservationCommand cancelProductReservationCommand){
         ProductReservationCancelledEvent productReservationCancelledEvent = ProductReservationCancelledEvent.builder()
