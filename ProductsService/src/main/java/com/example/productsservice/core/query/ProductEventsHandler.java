@@ -1,5 +1,6 @@
 package com.example.productsservice.core.query;
 
+import com.example.core.events.ProductReservationCancelledEvent;
 import com.example.core.events.ProductReservedEvent;
 import com.example.productsservice.core.data.ProductEntity;
 import com.example.productsservice.core.data.ProductRepository;
@@ -24,6 +25,12 @@ public class ProductEventsHandler {
     public void on(ProductReservedEvent event){
         ProductEntity productEntity = productRepository.findByProductId(event.getProductId());
         productEntity.setQuantity(productEntity.getQuantity() - event.getQuantity());
+        productRepository.save(productEntity);
+    }
+    @EventHandler
+    public void on(ProductReservationCancelledEvent event){
+        ProductEntity productEntity = productRepository.findByProductId(event.getProductId());
+        productEntity.setQuantity(productEntity.getQuantity()+ event.getQuantity());
         productRepository.save(productEntity);
     }
 }

@@ -3,7 +3,6 @@ package com.example.ordersservice.Data;
 import com.example.ordersservice.RestModel.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.io.Serial;
 import java.io.Serializable;
