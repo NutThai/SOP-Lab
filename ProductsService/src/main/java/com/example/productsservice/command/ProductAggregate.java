@@ -37,7 +37,7 @@ public class ProductAggregate {
     }
 
     @CommandHandler
-    public ProductAggregate(ReserveProductCommand reserveProductCommand){
+    public void handle(ReserveProductCommand reserveProductCommand){
         if (this.quantity < reserveProductCommand.getQuantity()){
             throw new IllegalArgumentException("Insufficient number of items in stock");
         }
@@ -50,7 +50,7 @@ public class ProductAggregate {
         AggregateLifecycle.apply(productReservedEvent);
     }
     @CommandHandler
-    public ProductAggregate(CancelProductReservationCommand cancelProductReservationCommand){
+    public void handle(CancelProductReservationCommand cancelProductReservationCommand){
         ProductReservationCancelledEvent productReservationCancelledEvent = ProductReservationCancelledEvent.builder()
                 .orderId(cancelProductReservationCommand.getOrderId())
                 .productId(cancelProductReservationCommand.getProductId())

@@ -4,7 +4,9 @@ import com.example.core.model.PaymentDetails;
 import com.example.core.model.User;
 import com.example.core.query.FetchUserPaymentDetailsQuery;
 import org.axonframework.queryhandling.QueryHandler;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserEventsHandler {
     @QueryHandler
     public User findUserPaymentDetails(FetchUserPaymentDetailsQuery query){

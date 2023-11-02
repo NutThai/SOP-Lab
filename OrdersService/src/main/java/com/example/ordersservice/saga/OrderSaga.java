@@ -16,6 +16,7 @@ import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
+import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
@@ -38,20 +39,21 @@ public class OrderSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderCreatedEvent orderCreatedEvent) {
-
         ReserveProductCommand reserveProductCommand = ReserveProductCommand.builder()
                 .orderId(orderCreatedEvent.getOrderId())
                 .productId(orderCreatedEvent.getProductId())
                 .quantity(orderCreatedEvent.getQuantity())
                 .userId(orderCreatedEvent.getUserId())
                 .build();
-        System.out.println("ReserveProductCommand "+reserveProductCommand.toString());
+//        System.out.println("ReserveProductCommand "+reserveProductCommand.toString());
         commandGateway.send(reserveProductCommand, (commandMessage, commandResultMessage) -> {
             if (commandResultMessage.isExceptional()) {
+                System.out.println("😺 Reject");
                 RejectOrderCommand rejectOrderCommand = new RejectOrderCommand(
                         orderCreatedEvent.getOrderId(),
                         commandResultMessage.exceptionResult().getMessage()
                 );
+                System.out.println(rejectOrderCommand.toString());
                 commandGateway.send(rejectOrderCommand);
             }
         });
@@ -66,9 +68,11 @@ public class OrderSaga {
             user = queryGateway.query(fetchUserPaymentDetailsQuery, ResponseTypes.instanceOf(User.class)).join();
         }catch(Exception ex){
             cancelProductReservation(productReservedEvent, ex.getMessage());
+            System.out.println("Hello fetchUserPaymentDetailsQuery");
             return;
         }
         if(user == null){
+            System.out.println("Hello user");
             cancelProductReservation(productReservedEvent, "Could not fetch user payment details.");
             return;
         }
@@ -79,7 +83,8 @@ public class OrderSaga {
                 .build();
         String result = null;
         try{
-            result = commandGateway.sendAndWait(processPaymentCommand);
+            System.out.println("Hello commandGateway");
+            result = String.valueOf(commandGateway.send(processPaymentCommand));
         }catch (Exception e){
             cancelProductReservation(productReservedEvent, e.getMessage());
             return;
@@ -100,7 +105,7 @@ public class OrderSaga {
     }
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent paymentProcessedEvent){
-        ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(paymentProcessedEvent.getOrderId());
+        ApproveOrderCommand approveOrderCommand = ApproveOrderCommand.builder().orderId(paymentProcessedEvent.getOrderId()).build();
         commandGateway.send(approveOrderCommand);
     }
     @EndSaga

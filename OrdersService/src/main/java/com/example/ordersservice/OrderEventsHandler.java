@@ -23,6 +23,7 @@ public class OrderEventsHandler {
     public void on(OrderApprovedEvent event){
         OrderEntity orderEntity = orderRepository.findByOrderId(event.getOrderId());
         if(orderEntity == null){
+            System.out.println("return null");
             return;
         }
         orderEntity.setOrderStatus(event.getOrderStatus());

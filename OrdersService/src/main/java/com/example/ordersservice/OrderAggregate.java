@@ -31,12 +31,12 @@ public class OrderAggregate {
         AggregateLifecycle.apply(orderCreatedEvent);
     }
     @CommandHandler
-    public OrderAggregate(ApproveOrderCommand approveOrderCommand){
+    public void handle(ApproveOrderCommand approveOrderCommand){
         OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(approveOrderCommand.getOrderId());
         AggregateLifecycle.apply(orderApprovedEvent);
     }
     @CommandHandler
-    public OrderAggregate(RejectOrderCommand rejectOrderCommand){
+    public void handle(RejectOrderCommand rejectOrderCommand){
         OrderRejectedEvent orderRejectedEvent = new OrderRejectedEvent(
                 rejectOrderCommand.getOrderId(),
                 rejectOrderCommand.getReason()

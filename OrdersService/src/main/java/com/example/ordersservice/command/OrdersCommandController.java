@@ -17,7 +17,7 @@ import java.util.UUID;
 public class OrdersCommandController {
     private final Environment env;
     private final CommandGateway commandGateway;
-    @Autowired
+
     public OrdersCommandController(Environment env, CommandGateway commandGateway){
         this.env = env;
         this.commandGateway = commandGateway;
@@ -28,7 +28,7 @@ public class OrdersCommandController {
                 .productId(model.getProductId())
                 .quantity(model.getQuantity())
                 .addressId(model.getAddressId())
-                .userId("1212312121")
+                .userId("27b95829-4f3f-4ddf-8983-151ba010e35b")
                 .orderStatus(OrderStatus.CREATED)
                 .orderId(UUID.randomUUID().toString())
                 .build();
